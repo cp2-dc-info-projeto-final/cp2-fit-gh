@@ -73,7 +73,7 @@
 </script>
 
 <div class="relative px-8">
-  <Navbar class="fixed start-0 top-0 z-20 w-full bg-gray-800 px-2 py-2.5 sm:px-4">
+  <Navbar class="fixed start-0 top-0 z-20 w-full bg-white-800 px-2 py-2.5 sm:px-4 shadow-lg p-4">
     <NavBrand href="/">
       <img src="/images/icon.svg" class="me-3 h-6 sm:h-9" alt="Logo aleatória" />
       <!-- ALTERADO: apenas o texto abaixo -->
