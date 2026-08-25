@@ -13,6 +13,7 @@ export interface UserFormData {
   email: string;
   senha?: string;
   horario: string;
+  dataNascimento: string;
   role: string;
 
 }
