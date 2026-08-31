@@ -19,7 +19,7 @@
   ];
     // Opções de horario
     const horarioOptions = [
-    { value: 'manhã', name: 'Manhã' },
+    { value: 'manha', name: 'Manhã' },
     { value: 'tarde', name: 'Tarde' },
     { value: 'noite', name: 'Noite' }
   ];
