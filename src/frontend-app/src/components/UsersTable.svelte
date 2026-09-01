@@ -36,6 +36,11 @@
     }
   }
 
+  function formatarData(dataIso:string) {
+    const partes = dataIso.split('-');
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
   // Abre modal de confirmação
   function openConfirm(id: number) {
     confirmTargetId = id;
@@ -85,6 +90,7 @@
       const res = await api.get('/users');
       const body = res.data as ApiResponse<User[]>;
       if (body.success) {
+        console.log(body.data)
         users = body.data ?? [];
       } else {
         error = body.message;
@@ -114,6 +120,7 @@
         <TableHeadCell class="w-32">Login</TableHeadCell>
         <TableHeadCell class="min-w-0">Email</TableHeadCell>
         <TableHeadCell class="min-w-0">Horário</TableHeadCell>
+        <TableHeadCell class="min-w-0">Data de Nascimento</TableHeadCell>
         <TableHeadCell class="w-20">Role</TableHeadCell>
         <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
       </TableHead>
@@ -124,6 +131,7 @@
             <TableBodyCell>{user.login}</TableBodyCell>
             <TableBodyCell class="truncate max-w-0">{user.email}</TableBodyCell>
             <TableBodyCell class="truncate max-w-0">{user.horario}</TableBodyCell>
+            <TableBodyCell class="truncate max-w-0">{formatarData(user.datanascimento)}</TableBodyCell>
             <TableBodyCell>
               <Badge color={user.role === 'admin' ? 'red' : 'blue'} class="text-xs">
                 {user.role}

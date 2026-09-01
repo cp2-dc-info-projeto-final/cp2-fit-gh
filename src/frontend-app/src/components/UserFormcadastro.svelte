@@ -87,6 +87,7 @@ if (idade < 18) {
     error = '';
     try {
       const userData = { ...user };
+
       // Remove senha vazia na edição para não sobrescrever indevidamente
       if (id !== null && !userData.senha) {
         delete userData.senha;

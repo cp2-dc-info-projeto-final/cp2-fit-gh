@@ -10,7 +10,7 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '',horario: '', role: 'user' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '',horario: '',dataNascimento: '', role: 'user' }; // dados do form
   
   // Opções de roles
   const roleOptions = [

@@ -25,7 +25,7 @@ router.get('/', verifyToken, isAdmin, async function(req, res) {
   try {
     const { login } = req.query;
 
-    let query = 'SELECT id, login, email, horario, role FROM usuario';
+    let query = 'SELECT id, login, email, horario, dataNascimento, role FROM usuario';
     let params = [];
 
     if (login && login.trim() !== '') {
@@ -36,7 +36,7 @@ router.get('/', verifyToken, isAdmin, async function(req, res) {
     query += ' ORDER BY id';
 
     const result = await pool.query(query, params);
-
+    console.log(result.rows)
     return sendSuccess(res, 200, null, result.rows);
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);
@@ -49,7 +49,7 @@ router.get('/me', verifyToken, async function(req, res) {
   try {
     const id = req.user.id;
     const result = await pool.query(
-      'SELECT id, login, email, horario, role FROM usuario WHERE id = $1',
+      'SELECT id, login, email, horario, dataNascimento, role FROM usuario WHERE id = $1',
       [id]
     );
 
@@ -70,7 +70,7 @@ router.get('/:id', verifyToken, isAdmin, async function(req, res) {
     const { id } = req.params;
 
     const result = await pool.query(
-      'SELECT id, login, email,horario, role FROM usuario WHERE id = $1',
+      'SELECT id, login, email, horario, dataNascimento, role FROM usuario WHERE id = $1',
       [id]
     );
 
@@ -88,7 +88,7 @@ router.get('/:id', verifyToken, isAdmin, async function(req, res) {
 /* POST - Criar novo usuário */
 router.post('/', verifyToken, isAdmin, async function(req, res) {
   try {
-    const { login, email, senha, horario, role = 'user' } = req.body;
+    const { login, email, senha, horario, dataNascimento, role = 'user' } = req.body;
     
     // Validação básica
     if (!login || !email || !senha ) {
@@ -120,8 +120,8 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
     const hashedPassword = await bcrypt.hash(senha, 12);
 
     const result = await pool.query(
-      'INSERT INTO usuario (login, email, senha, horario, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, login, email, horario, role',
-      [login, email, hashedPassword, horario, role]
+      'INSERT INTO usuario (login, email, senha, horario, dataNascimento, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, login, email, horario,dataNascimento, role',
+      [login, email, hashedPassword, horario,dataNascimento, role]
     );
 
     return sendSuccess(res, 201, 'Usuário criado com sucesso', result.rows[0]);
@@ -137,7 +137,7 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
 
 router.post('/me', verifyToken, async function(req, res) {
   try {
-    const { login, email, senha, horario, role = 'user' } = req.body;
+    const { login, email, senha, horario, dataNascimento, role = 'user' } = req.body;
     
     // Validação básica
     if (!login || !email || !senha ) {
@@ -169,8 +169,8 @@ router.post('/me', verifyToken, async function(req, res) {
     const hashedPassword = await bcrypt.hash(senha, 12);
 
     const result = await pool.query(
-      'INSERT INTO usuario (login, email, senha, horario, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, login, email, horario, role',
-      [login, email, hashedPassword, horario, role]
+      'INSERT INTO usuario (login, email, senha, horario,dataNascimento, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, login, email, horario, dataNascimento, role',
+      [login, email, hashedPassword, horario, dataNascimento, role]
     );
 
     return sendSuccess(res, 201, 'Usuário criado com sucesso', result.rows[0]);
@@ -189,7 +189,7 @@ router.post('/me', verifyToken, async function(req, res) {
 /* POST - Cadastro público */
 router.post('/register', async function(req, res) {
   try {
-    const { login, email, senha, horario } = req.body;
+    const { login, email, senha, horario, dataNascimento } = req.body;
 
     const errors = [];
 
@@ -217,6 +217,13 @@ router.post('/register', async function(req, res) {
       errors.push({
         field: 'horario',
         message: 'horario é obrigatória'
+      });
+    }
+
+    if (!dataNascimento) {
+      errors.push({
+        field: 'dataNascimento',
+        message: 'data de nascimento é obrigatória'
       });
     }
 
@@ -257,11 +264,11 @@ router.post('/register', async function(req, res) {
     const result = await pool.query(
       `
       INSERT INTO usuario
-      (login, email, senha, horario, role)
-      VALUES ($1, $2, $3, $4, 'user')
-      RETURNING id, login, email, horario, role
+      (login, email, senha, horario, dataNascimento,role)
+      VALUES ($1, $2, $3, $4, $5, 'user')
+      RETURNING id, login, email, horario, dataNascimento, role
       `,
-      [login, email, senhaHash, horario]
+      [login, email, senhaHash, horario, dataNascimento]
     );
 
     return sendSuccess(
@@ -288,7 +295,7 @@ router.post('/login', async function(req, res) {
     const { login, password } = req.body;
 
     const result = await pool.query(`
-      SELECT id, login, email, senha as passwordHash, horario, role
+      SELECT id, login, email, senha as passwordHash, horario, dataNascimento, role
       FROM usuario
       WHERE login = $1
     `, [login]);
@@ -315,6 +322,7 @@ router.post('/login', async function(req, res) {
           login: user.login,
           email: user.email,
           horario: user.horario,
+          dataNascimento: user.dataNascimento,
           role: user.role
         },
         process.env.JWT_SECRET,
@@ -337,7 +345,7 @@ router.put('/me', verifyToken, async function (req, res) {
   try {
     const id  = req.user.id;
     console.log(id);
-    const { login, email, senha, horario, role } = req.body;
+    const { login, email, senha, horario, dataNascimento, role } = req.body;
 
     // Validação
     const errors = [];
@@ -361,6 +369,13 @@ router.put('/me', verifyToken, async function (req, res) {
       errors.push({
         field: 'horario',
         message: 'Horário é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+    if (!dataNascimento) {
+      errors.push({
+        field: 'dataNascimento',
+        message: 'data de nascimento é obrigatória',
         code: 'REQUIRED'
       });
     }
@@ -430,10 +445,11 @@ router.put('/me', verifyToken, async function (req, res) {
              email = $2,
              senha = $3,
              horario = $4,
-             role = $5
-         WHERE id = $6
-         RETURNING id, login, email, horario, role`,
-        [login, email, senhaHash, horario, role, id]
+             dataNascimento = $5,
+             role = $6
+         WHERE id = $7
+         RETURNING id, login, email, horario, dataNascimento, role`,
+        [login, email, senhaHash, horario, dataNascimento, role, id]
       );
     } else {
       // Atualiza sem alterar senha
@@ -442,10 +458,11 @@ router.put('/me', verifyToken, async function (req, res) {
          SET login = $1,
              email = $2,
              horario = $3,
-             role = $4
-         WHERE id = $5
-         RETURNING id, login, email, horario, role`,
-        [login, email, horario, role, id]
+             dataNascimento = $4,
+             role = $5
+         WHERE id = $6
+         RETURNING id, login, email, horario,dataNascimento, role`,
+        [login, email, horario, dataNascimento, role, id]
       );
     }
 
@@ -467,7 +484,7 @@ router.put('/me', verifyToken, async function (req, res) {
 router.put('/:id', verifyToken, isAdmin, async function (req, res) {
   try {
     const { id } = req.params;
-    const { login, email, senha, horario, role } = req.body;
+    const { login, email, senha, horario, dataNascimento, role } = req.body;
 
     // Validação
     const errors = [];
@@ -491,6 +508,13 @@ router.put('/:id', verifyToken, isAdmin, async function (req, res) {
       errors.push({
         field: 'horario',
         message: 'Horário é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+    if (!dataNascimento) {
+      errors.push({
+        field: 'dataNascimento',
+        message: 'data de nascimento é obrigatória',
         code: 'REQUIRED'
       });
     }
@@ -560,10 +584,11 @@ router.put('/:id', verifyToken, isAdmin, async function (req, res) {
              email = $2,
              senha = $3,
              horario = $4,
-             role = $5
-         WHERE id = $6
-         RETURNING id, login, email, horario, role`,
-        [login, email, senhaHash, horario, role, id]
+             dataNascimento = $5,
+             role = $6
+         WHERE id = $7
+         RETURNING id, login, email, horario, dataNascimento, role`,
+        [login, email, senhaHash, horario, dataNascimento, role, id]
       );
     } else {
       // Atualiza sem alterar senha
@@ -572,10 +597,11 @@ router.put('/:id', verifyToken, isAdmin, async function (req, res) {
          SET login = $1,
              email = $2,
              horario = $3,
-             role = $4
-         WHERE id = $5
-         RETURNING id, login, email, horario, role`,
-        [login, email, horario, role, id]
+             dataNascimento = $4,
+             role = $5
+         WHERE id = $6
+         RETURNING id, login, email, horario, dataNascimento, role`,
+        [login, email, horario, dataNascimento, role, id]
       );
     }
 
@@ -597,7 +623,7 @@ router.put('/:id', verifyToken, isAdmin, async function (req, res) {
 router.put('/:me', verifyToken, async function (req, res) {
   try {
 
-    const { login, email, senha, horario, role } = req.body;
+    const { login, email, senha, horario, dataNascimento, role } = req.body;
 
     // Validação
     const errors = [];
@@ -623,6 +649,13 @@ router.put('/:me', verifyToken, async function (req, res) {
         message: 'Horário é obrigatório',
         code: 'REQUIRED'
       });
+      if (!dataNascimento) {
+        errors.push({
+          field: 'dataNascimento',
+          message: 'data de nascimento é obrigatória',
+          code: 'REQUIRED'
+        });
+      }
     }
     if (!role) {
       errors.push({
@@ -683,9 +716,10 @@ router.put('/:me', verifyToken, async function (req, res) {
              email = $2,
              senha = $3,
              horario = $4,
-             role = $5
-         RETURNING id, login, email, horario, role`,
-        [login, email, senhaHash, horario, role]
+             dataNascimento = $5,
+             role = $6
+         RETURNING id, login, email, horario, dataNascimento, role`,
+        [login, email, senhaHash, horario, dataNascimento, role]
       );
     } else {
       // Atualiza sem alterar senha
@@ -694,9 +728,10 @@ router.put('/:me', verifyToken, async function (req, res) {
          SET login = $1,
              email = $2,
              horario = $3,
-             role = $4
-         RETURNING id, login, email, horario, role`,
-        [login, email, horario, role]
+             dataNascimento = $4,
+             role = $5
+         RETURNING id, login, email, horario, dataNascimento, role`,
+        [login, email, horario, dataNascimento, role]
       );
     }
 
