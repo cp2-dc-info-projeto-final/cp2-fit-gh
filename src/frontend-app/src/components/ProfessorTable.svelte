@@ -111,14 +111,12 @@
       <Table class="w-full max-w-5xl mx-auto my-8 shadow-lg border border-gray-200 rounded-lg">
         <TableHead>
           <TableHeadCell class="w-32">Nome</TableHeadCell>
-          <TableHeadCell class="min-w-0">Horário</TableHeadCell>
           <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
         </TableHead>
         <TableBody>
           {#each users as user}
             <TableBodyRow>
               <TableBodyCell>{user.login}</TableBodyCell>
-              <TableBodyCell class="truncate max-w-0">{user.horario}</TableBodyCell>
               <TableBodyCell>
               </TableBodyCell>
               <TableBodyCell>

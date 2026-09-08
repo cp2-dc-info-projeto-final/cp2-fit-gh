@@ -17,12 +17,56 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_login_length CHECK (length(login) >= 3 AND length(login) <= 50), -- comprimento
     CONSTRAINT ck_usuario_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'), -- formato de email com expressão regular
     CONSTRAINT ck_usuario_senha_length CHECK (length(senha) >= 6), -- comprimento mínimo
-    CONSTRAINT ck_usuario_horario_valid CHECK (horario IN ('manha','tarde','noite')), -- tipos de usuário
     CONSTRAINT ck_usuario_dataNascimento_format CHECK (dataNascimento ~* '^\d{4}-\d{2}-\d{2}$'),
     CONSTRAINT ck_usuario_role_valid CHECK (role IN ('admin', 'user', 'professor')) -- tipos de usuário
 );
+DROP TABLE IF EXISTS atividade;
 
-INSERT INTO usuario (login, email, senha, horario,dataNascimento, role ) VALUES
+CREATE TABLE atividade (
+    id bigint GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,  
+
+    -- Constraints
+    CONSTRAINT pk_atividade PRIMARY KEY (id),
+    CONSTRAINT uk_atividade_nome UNIQUE (nome)
+
+);
+
+DROP TABLE IF EXISTS turma;
+
+CREATE TABLE turma (
+    id bigint GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,    
+    horario text NOT NULL DEFAULT 'manhã',
+    dataSemana TEXT NOT NULL,
+
+    -- Constraints
+    CONSTRAINT pk_turma PRIMARY KEY (id),
+    CONSTRAINT uk_turma_nome UNIQUE (nome),
+    CONSTRAINT ck_turma_horario_valid CHECK (horario IN ('manha','tarde','noite')),
+    CONSTRAINT ck_turma_dataSemana_format CHECK (dataSemana ~* '^[A-Za-z]')
+
+);
+
+DROP TABLE IF EXISTS agendamento;
+
+CREATE TABLE turma (
+    id bigint GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,    
+    
+
+    -- Constraints
+    CONSTRAINT pk_turma PRIMARY KEY (id),
+    CONSTRAINT uk_turma_nome UNIQUE (nome),
+    CONSTRAINT ck_turma_horario_valid CHECK (horario IN ('manha','tarde','noite')),
+    CONSTRAINT ck_turma_dataSemana_format CHECK (dataSemana ~* '^[A-Za-z]')
+
+);
+
+
+
+
+INSERT INTO usuario (login, email, senha, dataNascimento, role ) VALUES
 -- senha efelantinho
-('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manha','1980-08-08', 'admin'),
-('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','noite','2000-07-09', 'user');
+('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','1980-08-08', 'admin'),
+('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','2000-07-09', 'user');

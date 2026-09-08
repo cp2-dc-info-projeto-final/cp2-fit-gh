@@ -10,18 +10,12 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '',horario: '',dataNascimento: '', role: 'user' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '',dataNascimento: '', role: 'user' }; // dados do form
   
   // Opções de roles
   const roleOptions = [
     { value: 'user', name: 'Usuário' },
     { value: 'admin', name: 'Administrador' }
-  ];
-    // Opções de horario
-    const horarioOptions = [
-    { value: 'manha', name: 'Manhã' },
-    { value: 'tarde', name: 'Tarde' },
-    { value: 'noite', name: 'Noite' }
   ];
   let loading = false;
   let error = '';
@@ -53,6 +47,24 @@
    // } 
   });
 
+  function calcularIdade(dataNascimento: string): number {
+  const hoje = new Date();
+  const nascimento = new Date(`${dataNascimento}T00:00:00`);
+
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+  const mes = hoje.getMonth() - nascimento.getMonth();
+
+  if (
+    mes < 0 ||
+    (mes === 0 && hoje.getDate() < nascimento.getDate())
+  ) {
+    idade--;
+  }
+
+  return idade;
+}
+
   // Submissão do formulário
   async function handleSubmit() {
     fieldErrors = [];
@@ -70,6 +82,27 @@
       return;
     }
 
+    if (!user.dataNascimento) {
+  fieldErrors = [
+    { field: 'dataNascimento', message: 'Data de nascimento é obrigatória.' }
+  ];
+  error = 'Informe a data de nascimento.';
+  return;
+}
+
+const idade = calcularIdade(user.dataNascimento);
+
+if (idade < 18) {
+  fieldErrors = [
+    {
+      field: 'dataNascimento',
+      message: 'O usuário deve ter pelo menos 18 anos.'
+    }
+  ];
+  error = 'O cadastro não pode ser realizado. O usuário deve ser maior de 18 anos.';
+  return;
+}
+  
     loading = true;
     error = '';
     try {
@@ -113,6 +146,9 @@
     <!-- Mensagem de erro -->
     {#if error}
       <div class="text-red-500 text-center">{error}</div>
+      {#each fieldErrors as fieldError}
+        <div class="text-red-500 text-center">{fieldError.message}</div>
+      {/each}
     {/if}
     <!-- Campo login -->
     <div>
@@ -144,15 +180,27 @@
         <div class="mt-1 text-sm text-red-500">{errorOf('senha')}</div>
       {/if}
     </div>
+        <!-- Campo data de nascimento -->
+<div>
+  <Label for="dataNascimento">Data de nascimento</Label>
 
-     <!-- Campo horario -->
-     <div>
-      <Label for="horario">Horário</Label>
-      <Select id="horario" bind:value={user.horario} items={horarioOptions} class="mt-1" />
-      {#if errorOf('horario')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('horario')}</div>
-      {/if}
+  <Input
+    id="dataNascimento"
+    type="date"
+    bind:value={user.dataNascimento}
+    required
+    class="mt-1"
+  />
+
+  {#if errorOf('dataNascimento')}
+    <div class="mt-1 text-sm text-red-500">
+      {errorOf('dataNascimento')}
     </div>
+  {/if}
+</div>
+
+    
+
     <!-- Botões de ação -->
     <div class="flex gap-4 justify-end mt-4">
       <!-- Botão cancelar/voltar -->

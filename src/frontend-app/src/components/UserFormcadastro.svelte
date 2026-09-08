@@ -10,7 +10,7 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user', horario: '', dataNascimento: '' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user', dataNascimento: '' }; // dados do form
 
   // Opções de roles
   const roleOptions = [
@@ -136,6 +136,9 @@ if (idade < 18) {
     <!-- Mensagem de erro -->
     {#if error}
       <div class="text-red-500 text-center">{error}</div>
+      {#each fieldErrors as fieldError}
+        <div class="text-red-500 text-center">{fieldError.message}</div>
+      {/each}
     {/if}
     <!-- Campo login -->
     <div>
@@ -169,23 +172,6 @@ if (idade < 18) {
         <div class="mt-1 text-sm text-red-500">{errorOf('senha')}</div>
       {/if}
     </div>
-    <!--horarios de disponibilidade-->
-
-      <div>
-        <Label for="horario">Horário</Label>
-      
-        <select
-          id="horario"
-          bind:value={user.horario}
-          required
-          class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        >
-          <option value="" disabled>Selecione o horário</option>
-          <option value="manha">Manhã</option>
-          <option value="tarde">Tarde</option>
-          <option value="noite">Noite</option>
-        </select>
-      </div>
 
       <!-- Campo data de nascimento -->
 <div>
