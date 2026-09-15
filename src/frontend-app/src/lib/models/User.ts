@@ -2,9 +2,9 @@ export interface User {
   id: number;
   login: string;
   email: string;
-  horario: string;
+  datanascimento: string;
   role: string;
-
+  atividade?: string;
 }
 
 export interface UserFormData {
@@ -15,4 +15,13 @@ export interface UserFormData {
   dataNascimento: string;
   role: string;
 
+}
+
+export interface UserAtividade {
+  id: number;
+  login: string;
+  email: string;
+  datanascimento: string;
+  atividade: string;
+  role: User;
 }

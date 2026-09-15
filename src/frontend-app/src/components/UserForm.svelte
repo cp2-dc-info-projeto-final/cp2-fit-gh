@@ -92,6 +92,8 @@
   return;
 }
 
+
+
 const idade = calcularIdade(user.dataNascimento);
 
 if (idade < 18) {

@@ -63,3 +63,6 @@ INSERT INTO atividade (nome, descricao, professor_id) VALUES
 INSERT INTO turma (nome, atividade_id, professor_id, dia_semana, horario_inicio, horario_fim, vagas) VALUES
 ('Funcional A', 1, 3, 'segunda', '08:00', '09:00', 20),
 ('Corrida A', 2, 3, 'quarta', '16:00', '17:00', 15);
+
+INSERT INTO turma_usuario (turma_id, usuario_id)
+VALUES (2, 2);

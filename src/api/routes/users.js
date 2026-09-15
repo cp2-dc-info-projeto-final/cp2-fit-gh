@@ -20,30 +20,152 @@ function sendError(res, status, message, errors = []) {
   });
 }
 
-/* GET - Buscar todos os usuários (com filtro opcional por login) */
+/* GET - Buscar todos os usuários com suas atividades */
 router.get('/', verifyToken, isAdmin, async function(req, res) {
   try {
     const { login } = req.query;
 
-    let query = 'SELECT id, login, email, dataNascimento, role FROM usuario';
-    let params = [];
+    let query = `
+      SELECT
+        u.id,
+        u.login,
+        u.email,
+        u.dataNascimento,
+        u.role,
+        COALESCE(
+          STRING_AGG(DISTINCT a.nome, ', ' ORDER BY a.nome),
+          'Sem atividade'
+        ) AS atividade
+      FROM usuario u
+
+      LEFT JOIN turma_usuario tu
+        ON tu.usuario_id = u.id
+
+      LEFT JOIN turma t
+        ON t.id = tu.turma_id
+
+      LEFT JOIN atividade a
+        ON a.id = t.atividade_id
+
+    `;
+
+    const params = [];
 
     if (login && login.trim() !== '') {
-      query += ' WHERE login ILIKE $1';
-      params.push(`%${login}%`);
+      query += `
+        WHERE u.login ILIKE $1
+      `;
+
+      params.push(`%${login.trim()}%`);
     }
 
-    query += ' ORDER BY id';
+    query += `
+      GROUP BY
+        u.id,
+        u.login,
+        u.email,
+        u.dataNascimento,
+        u.role
+
+      ORDER BY u.login
+    `;
 
     const result = await pool.query(query, params);
-    console.log(result.rows)
-    return sendSuccess(res, 200, null, result.rows);
+
+    console.log('Usuários com atividades:', result.rows);
+
+    return sendSuccess(
+      res,
+      200,
+      null,
+      result.rows
+    );
+
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);
-    return sendError(res, 500, 'Erro interno do servidor');
+
+    return sendError(
+      res,
+      500,
+      'Erro interno do servidor'
+    );
   }
 });
 
+/* GET - Buscar todos os usuários com suas atividades */
+router.get('/prof', verifyToken, async function(req, res) {
+  try {
+    const { login } = req.query;
+
+    let query = `
+      SELECT
+        u.id,
+        u.login,
+        u.email,
+        u.dataNascimento,
+        u.role,
+        COALESCE(
+          STRING_AGG(DISTINCT a.nome, ', ' ORDER BY a.nome),
+          'Sem atividade'
+        ) AS atividade
+      FROM usuario u
+
+      LEFT JOIN turma_usuario tu
+        ON tu.usuario_id = u.id
+
+      LEFT JOIN turma t
+        ON t.id = tu.turma_id
+
+      LEFT JOIN atividade a
+        ON a.id = t.atividade_id
+      WHERE u.role = 'user'
+      
+
+    `;
+
+    const params = [];
+
+    if (login && login.trim() !== '') {
+      query += `
+        AND u.login ILIKE $1
+
+      `;
+
+      params.push(`%${login.trim()}%`);
+    }
+
+    query += `
+      GROUP BY
+        u.id,
+        u.login,
+        u.email,
+        u.dataNascimento,
+        u.role
+
+      ORDER BY u.login
+    `;
+
+    const result = await pool.query(query, params);
+
+    console.log('Usuários com atividades:', result.rows);
+
+    return sendSuccess(
+      res,
+      200,
+      null,
+      result.rows
+    );
+
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+
+    return sendError(
+      res,
+      500,
+      'Erro interno do servidor'
+    );
+  }
+});
 /* GET - Buscar usuário autenticado */
 router.get('/me', verifyToken, async function(req, res) {
   try {
