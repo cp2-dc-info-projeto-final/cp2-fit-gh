@@ -170,7 +170,7 @@ router.get('/prof', verifyToken, async function(req, res) {
 /* GET - Buscar todos os usuários com suas atividades */
 router.get('/atividade', verifyToken, async function(req, res) {
   try {
-    const { login } = req.query;
+    const { atividade_id } = req.query;
 
     let query = `
       SELECT
@@ -193,23 +193,18 @@ router.get('/atividade', verifyToken, async function(req, res) {
 
       LEFT JOIN atividade a
         ON a.id = t.atividade_id
-      WHERE a.id = 
+      WHERE a.id = atividade_id
       
 
     `;
 
-    const params = [];
+    const params = [];{
 
-    if (login && login.trim() !== '') {
-      query += `
-        AND u.login ILIKE $1
-
-      `;
-
-      params.push(`%${login.trim()}%`);
+      console.log(atividade_id);
+      params.push(`%${atividade_id.trim()}%`);
     }
 
-    query += `
+    query += ` 
       GROUP BY
         u.id,
         u.login,
