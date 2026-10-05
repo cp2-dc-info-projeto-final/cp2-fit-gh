@@ -1,5 +1,10 @@
 <script lang="ts">
-	import ProfessorTable from '../../components/ProfessorTable.svelte';
-  </script>
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
-  <ProfessorTable/>
+  onMount(() => {
+    goto('/turmas');
+  });
+</script>
+
+<p class="p-8 text-gray-500">Redirecionando para Turmas...</p>
