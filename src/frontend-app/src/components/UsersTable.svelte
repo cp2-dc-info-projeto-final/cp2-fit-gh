@@ -36,8 +36,12 @@
     }
   }
 
-  function formatarData(dataIso:string) {
-    const partes = dataIso.split('-');
+  function formatarData(dataIso: string | Date | null | undefined) {
+    if (!dataIso) return '—';
+    // PostgreSQL pode devolver YYYY-MM-DD ou uma data ISO com horário.
+    const valor = dataIso instanceof Date ? dataIso.toISOString().slice(0, 10) : String(dataIso).slice(0, 10);
+    const partes = valor.split('-');
+    if (partes.length !== 3 || partes.some((parte) => !parte)) return String(dataIso);
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
   }
 

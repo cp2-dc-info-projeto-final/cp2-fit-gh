@@ -1,5 +1,5 @@
 <script lang="ts">
-	import UserFormEdit from '../../components/UserFormEdit.svelte';
+	import UserFormEdit from '../../components/atividades.svelte';
 
   </script>
   

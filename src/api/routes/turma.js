@@ -13,6 +13,9 @@ const sendSuccess = (res, status, message, data) =>
 const sendError = (res, status, message, errors = []) =>
   res.status(status).json({ success: false, message, errors });
 
+const adminOnly = (req, res, next) =>
+  req.user?.role === 'admin' ? next() : sendError(res, 403, 'Somente administradores podem editar ou excluir turmas.');
+
 const manager = (req, res, next) =>
   ['admin', 'professor'].includes(req.user?.role)
     ? next()
@@ -264,7 +267,7 @@ router.post('/', verifyToken, manager, async (req, res) => {
   }
 });
 
-router.put('/:id', verifyToken, manager, async (req, res) => {
+router.put('/:id', verifyToken, adminOnly, async (req, res) => {
   const client = await pool.connect();
 
   try {
@@ -398,7 +401,7 @@ router.put('/:id', verifyToken, manager, async (req, res) => {
   }
 });
 
-router.delete('/:id', verifyToken, manager, async (req, res) => {
+router.delete('/:id', verifyToken, adminOnly, async (req, res) => {
   try {
     const current = await pool.query(
       'SELECT professor_id FROM turma WHERE id = $1',

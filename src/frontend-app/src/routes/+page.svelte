@@ -18,7 +18,7 @@
 	async function handleAcao() {
 	  if (usuarioLogado) {
 		// usuário logado
-		await goto('/about');
+		await goto('/turmas');
 	  } else {
 		// usuário não logado
 		await goto('/login');
